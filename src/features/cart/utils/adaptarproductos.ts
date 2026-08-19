@@ -6,5 +6,7 @@ export function adaptadorProducto(productapi:ProductAPI):Product {
      id: productapi.id,
      titulo: productapi.title,
      precio: productapi.price,
+     categoria: productapi.category,
+     stock: productapi.rating?.count ?? 0,
     };
 }

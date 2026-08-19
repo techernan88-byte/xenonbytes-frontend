@@ -12,7 +12,9 @@ export const ProductCard = ({product,descuento,onAddCart,inStock}: propsProduct)
       
             <div className="p-4 border rounded h-full flex flex-col shadow-md">
             <h3 className="text-lg font-semibold">{product.titulo}</h3> 
-            <p>{precioFinal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+            <p>Precio:{precioFinal.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+            <p className='text-xs'>Cantidad:{product.stock}</p>
+            <p className='text-xs'>Categoria:{product.categoria}</p>
             {inStock?(
                <div className="">
                <button onClick={()=>onAddCart(product)} className="bg-marca text-white px-4 py-2 rounded hover:bg-marca-claro cursor-pointer transition-colors">Agregar</button>

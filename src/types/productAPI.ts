@@ -5,6 +5,8 @@ export interface ProductAPI{
      price: number;
      description:string;
      category:string;
+     rating:{count:number} ;
+     
 }  
 
 

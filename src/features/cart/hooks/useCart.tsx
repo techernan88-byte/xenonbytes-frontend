@@ -2,7 +2,7 @@
 import { type Product } from "../../../types/product";
 import { type carritoItem } from "../../../types/carritoItem";
 import { useState } from 'react';
-import { calcularPrecioFinal } from '../utils/pricing';
+import { calcularPrecioFinal } from '../../products/utils/pricing';
 
 
 export function useCart(descuento: number) {
