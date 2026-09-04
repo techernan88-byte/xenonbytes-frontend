@@ -1,3 +1,3 @@
 
-export { calcularPrecioFinal } from '../products/utils/pricing';
 export { Carrito} from './components/Carrito';
+export {CartProvider,useCart} from './context/CartContext'

@@ -5,18 +5,17 @@ import { useState } from 'react';
 import { calcularPrecioFinal } from '../../products/utils/pricing';
 
 
-export function useCart(descuento: number) {
+export function useCartState() {
 
     const [cart, setCart] = useState<carritoItem[]>([]);
 
 
     const clearCart = () => { setCart([]) };
 
-    const total = cart.reduce((sum, item) => sum + item.producto.precio * item.cantidad, 0);
+    const total = cart.reduce((sum, item) => sum + calcularPrecioFinal(item.producto) * item.cantidad, 0);
 
     const addToCart = (product: Product) => {
-        const precioDescuento = calcularPrecioFinal(product, descuento);
-        const productoConPrecio = { ...product, precio: precioDescuento };
+ 
 
         setCart((prev) => {
             const existe = prev.find((item) => item.producto.id === product.id);
@@ -28,7 +27,7 @@ export function useCart(descuento: number) {
                         : item
                 );
             }
-            return [...prev, { producto: productoConPrecio, cantidad: 1 }];
+            return [...prev, { producto: product, cantidad: 1 ,seleccionado:true }];
         }
         );
 
@@ -48,6 +47,31 @@ export function useCart(descuento: number) {
         );
     };
 
-    return { cart, total, addToCart, clearCart, removeFromCart };
+    const addItem =(id:number)=>{
+        setCart((prev)=> 
+            prev.map((item)=>
+            item.producto.id ===id
+                ? {...item,cantidad: item.cantidad+1}  
+                :item 
+            )
+        );
+            
+    }
+
+    const toggleSeleccion = (id:number)=>{
+        setCart((prev)=>
+            prev.map((item)=>
+            item.producto.id===id
+            ? {...item,seleccionado:!item.seleccionado}
+            : item
+            )
+        ); 
+    }
+
+    const totalSeleccionado = cart
+            .filter((item)=>item.seleccionado)
+            .reduce((sum,item)=>sum + calcularPrecioFinal(item.producto)*item.cantidad,0);
+
+    return { cart, total, addToCart, clearCart, removeFromCart, addItem, toggleSeleccion, totalSeleccionado};
 };
 

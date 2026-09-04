@@ -1,12 +1,13 @@
-import {calcularPrecioFinal} from '../utils/pricing';
+import {calcularPrecioFinal, obtenerDescuento } from '../utils/pricing';
 import {type propsProduct } from '../../../types/product';
 
 
 
 
-export const ProductCard = ({product,descuento,onAddCart,inStock}: propsProduct) =>{
+export const ProductCard = ({product,onAddCart,inStock}: propsProduct) =>{
      
-     const precioFinal= calcularPrecioFinal(product,descuento);
+     const precioFinal= calcularPrecioFinal(product);
+     const descuento = obtenerDescuento(product)
 
     return (
       
@@ -23,7 +24,7 @@ export const ProductCard = ({product,descuento,onAddCart,inStock}: propsProduct)
             ):(
                <p className="text-red-500 font-medium">Agotado</p>
             )}
-           {descuento!==0 && (<p className="text font-medium"> con descuento del {descuento}%</p>)}
+           {descuento!==0 && (<p className="text font-medium text-orange-800"> con descuento del {descuento}%</p>)}
             
             </div>);
 };
