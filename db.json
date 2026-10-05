@@ -16,7 +16,7 @@
     },
     {
       "id": "3",
-      "titulo": "Monitor LG 27\"",
+      "titulo": "Monitor LG 27",
       "precio": 4500,
       "categoria": "Computacion",
       "stock": 15
@@ -1417,13 +1417,13 @@
     {
       "productoId": "8",
       "cantidad": 2,
-      "seleccionado": false,
+      "seleccionado": true,
       "id": "GMz6SI_SLzs"
     },
     {
       "productoId": "5",
       "cantidad": 2,
-      "seleccionado": false,
+      "seleccionado": true,
       "id": "1GiyBnpiHCY"
     },
     {
