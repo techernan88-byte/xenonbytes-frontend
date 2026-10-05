@@ -1,12 +1,12 @@
-import { type carritoItem } from "./carritoItem";
+import { type CarritoConProducto } from "./carritoConProducto";
 import { type Product } from "./product";
 
 export interface CarritoProps {
-    carrito: carritoItem[];
-    total: number
-    quitItem: (number: number)=>void;
-    addItem: (number: number)=>void;
+    carrito: CarritoConProducto[];
+    quitItem: (item: CarritoConProducto)=>void;
+    addItem: (item: CarritoConProducto)=>void;
     addToCart: (product: Product) => void;
     clearCart: ()=>void;
-    
+    toggleSeleccion: (item: CarritoConProducto)=>void;
+    totalSeleccionado: number;    
 }

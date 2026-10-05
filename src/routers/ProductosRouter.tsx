@@ -1,34 +1,56 @@
-import { useState, useEffect } from "react";
-import { Carrito } from "../features/cart";
+import { useState } from "react";
+import { MiniCarrito } from "../features/cart";
 import { ProductCard } from "../features/products";
 import { useCart } from "../features/cart";
-
+import { useQuery } from "@tanstack/react-query";
 import { obtenerProductos } from "../features/products/services/productService";
-import { type Product } from "../types/product";
+import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery";
+import {useAgregarItem } from "../features/cart/hooks/useAgregarItem";
+import {useActualizarItem} from "../features/cart/hooks/useActualizarItem";
+import { useEliminarItem } from "../features/cart/hooks/useEliminarItem";
+import {type CarritoConProducto} from "../types/carritoConProducto";
 
 export function ProductosRouter() {
   //obtener datos de servicio
-  const [productos, setProductos] = useState<Product[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const cargar = async () => {
-      try {
-        const datos = await obtenerProductos();
-        setProductos(datos);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error Desconocido");
-      } finally {
-        setCargando(false);
-      }
-    };
-    cargar();
-  }, []);
+  const {
+    data: productos = [],
+    isPending: cargando,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["productos"],
+    queryFn: obtenerProductos,
+  });
 
   //carrito
-  const { cart, total, addToCart, clearCart, removeFromCart, addItem } =
-    useCart();
+  const {
+    totalSeleccionado,
+    addToCart,
+    clearCart,
+    removeFromCart,
+    addItem,
+    toggleSeleccion,
+  } = useCart();
+  const { data: carrito =[] } = useCarritoQuery();
+  //console.log("Carrito del servidor:", carrito);
+
+  // Agregar  al Carrito
+  const agregar = useAgregarItem();
+
+  //Actualizar en el carrito
+  const actualizar = useActualizarItem();
+
+  // Eliminar del carrito
+  const eliminar= useEliminarItem();
+
+  //Encontrar datos productos en carrito
+  const carritoConProductos = carrito.map((item)=>{
+    const producto = productos.find((p)=>p.id===item.productoId);
+    return {...item, producto};
+  })
+  .filter((item): item is CarritoConProducto=> item.producto!==undefined);
+  
+
 
   //sidebar
   const [sideBarAbierto, setSidebarAbierto] = useState(false);
@@ -127,8 +149,8 @@ export function ProductosRouter() {
             <div className="w-full lg:w-3/4">
               {cargando ? (
                 <p className="p-8">Cargando productos...</p>
-              ) : error ? (
-                <p className="p-8 text-red-500">Error: {error}</p>
+              ) : isError ? (
+                <p className="p-8 text-red-500">Error: {error.message}</p>
               ) : productosBuscados.length === 0 ? (
                 <div className="text-center py-16 text-gray-500">
                   <p className="text-lg font-medium">
@@ -147,7 +169,13 @@ export function ProductosRouter() {
                       key={product.id}
                       product={product}
                       inStock={product.stock > 0}
-                      onAddCart={addToCart}
+                      onAddCart={(product) =>
+                        agregar.mutate({
+                          productoId: product.id,
+                          cantidad: 1,
+                          seleccionado: true,
+                        })
+                      }
                     />
                   ))}
                 </div>
@@ -155,13 +183,34 @@ export function ProductosRouter() {
             </div>
 
             <div className="w-full lg:w-1/4 lg:sticky lg:top-4">
-              <Carrito
-                carrito={cart}
-                total={total}
-                quitItem={removeFromCart}
-                addItem={addItem}
-                clearCart={clearCart}
+              <MiniCarrito
+                carrito={carritoConProductos}
+                quitItem={(item)=>{
+                  if (item.cantidad===1){
+                    eliminar.mutate(item.id)
+                  }else{
+                    actualizar.mutate({
+                      id:item.id,
+                      cambios:{cantidad:item.cantidad-1},
+                    })
+                  }}
+                }
+                clearCart={()=>{
+                  carrito.forEach((item)=>eliminar.mutate(item.id))
+                }}
+                addItem={(item)=>
+                  actualizar.mutate({
+                  id:item.id,
+                  cambios :{cantidad: item.cantidad+1} 
+                })}
                 addToCart={addToCart}
+                toggleSeleccion={(item)=>
+                  actualizar.mutate({
+                    id: item.id,
+                    cambios:{seleccionado:!item.seleccionado},
+                  })
+                }
+                totalSeleccionado={totalSeleccionado}
               />
             </div>
           </div>

@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../features/cart";
-import { calcularPrecioFinal } from "../features/products/utils/pricing";
 
 export function CarritoRouter() {
-  const { cart, totalSeleccionado, toggleSeleccion, addItem, removeFromCart } =
-    useCart();
+  const { cart, totalSeleccionado, toggleSeleccion, addItem, removeFromCart } = useCart();
 
   // carrito vacio
   if (cart.length === 0) {

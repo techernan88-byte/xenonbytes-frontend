@@ -1,8 +1,17 @@
-import { PRODUCTOS } from "../../../PRODUCTOSexample";
+
 import {type Product } from "../../../types/product";
 
+const API_URL = "http://localhost:3000";
+
 export const obtenerProductos = async (): Promise<Product[]> => {
-  return PRODUCTOS;
+   const respuesta = await fetch(`${API_URL}/productos`);
+
+   if(!respuesta.ok){
+    throw new Error("No se pudieron carga los productos");
+   }
+  
+  
+  return respuesta.json();
 };
 
 

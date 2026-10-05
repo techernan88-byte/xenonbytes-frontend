@@ -1,11 +1,12 @@
 import { type CarritoProps } from "../../../types/carrito";
 
-export const Carrito = ({
+export const MiniCarrito = ({
   carrito,
-  total,
   quitItem,
   addItem,
   clearCart,
+  toggleSeleccion,
+  totalSeleccionado
 }: CarritoProps) => {
   return (
     <div className="p-4 border rounded">
@@ -15,6 +16,13 @@ export const Carrito = ({
         {carrito.map((item) => (
           <div key={item.producto.id}
            className="flex items-center justify-between gap-2 pb-3 border-b border-gray-100 last:border-0">
+
+            <input
+              type="checkbox"
+              checked={item.seleccionado}
+              onChange={() => toggleSeleccion(item)}
+              className="w-5 h-5 cursor-pointer shrink-0"
+            />
            
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-oscuro truncate">
@@ -25,14 +33,14 @@ export const Carrito = ({
                 </p>
               </div>
                <button
-                onClick={() => addItem(item.producto.id)}
+                onClick={() => addItem(item)}
                 className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white text-sm hover:bg-marca-claro cursor-pointer transition-colors"
 >
                 (+)
               </button>
           
               <button
-                onClick={() => quitItem(item.producto.id)}
+                onClick={() => quitItem(item)}
                 className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white text-sm hover:bg-marca-claro cursor-pointer transition-colors"
 >
                 {item.cantidad === 1 ? "🗑️" : "(-)"}
@@ -45,7 +53,10 @@ export const Carrito = ({
        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
         <span className="text-sm font-medium text-gray-600">Total</span>
         <span className="text-lg font-bold text-black">
-          {total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}
+              {totalSeleccionado.toLocaleString("es-MX", {
+                style: "currency",
+                currency: "MXN",
+              })}
         </span>
       </div>
       {/* <pre>{JSON.stringify(carrito, null, 2)}</pre> --> */}
@@ -54,8 +65,6 @@ export const Carrito = ({
         className="bg-zinc-500 text-white px-4 py-2 rounded cursor-pointer transition-colors ">
         Vaciar carrito
       </button>
-
-      
     </div>
   );
 };
