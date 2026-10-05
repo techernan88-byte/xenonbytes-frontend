@@ -9,6 +9,7 @@ import {useAgregarItem } from "../features/cart/hooks/useAgregarItem";
 import {useActualizarItem} from "../features/cart/hooks/useActualizarItem";
 import { useEliminarItem } from "../features/cart/hooks/useEliminarItem";
 import {type CarritoConProducto} from "../types/carritoConProducto";
+import { calcularPrecioFinal } from "../features/products/utils/pricing";
 
 export function ProductosRouter() {
   //obtener datos de servicio
@@ -24,12 +25,7 @@ export function ProductosRouter() {
 
   //carrito
   const {
-    totalSeleccionado,
-    addToCart,
-    clearCart,
-    removeFromCart,
-    addItem,
-    toggleSeleccion,
+    addToCart
   } = useCart();
   const { data: carrito =[] } = useCarritoQuery();
   //console.log("Carrito del servidor:", carrito);
@@ -50,7 +46,8 @@ export function ProductosRouter() {
   })
   .filter((item): item is CarritoConProducto=> item.producto!==undefined);
   
-
+  const totalSeleccionado = carritoConProductos.filter((item)=>item.seleccionado)
+            .reduce((sum,item)=>sum + calcularPrecioFinal(item.producto)*item.cantidad,0);
 
   //sidebar
   const [sideBarAbierto, setSidebarAbierto] = useState(false);
@@ -78,6 +75,8 @@ export function ProductosRouter() {
       : productosVisibles.filter((p) =>
           p.titulo.toLowerCase().includes(busqueda.toLowerCase()),
         );
+
+     //   console.log(productosBuscados);
 
   return (
     <>

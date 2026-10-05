@@ -9,7 +9,7 @@ const descuentoPorCategoria: Record <string, number> ={
   "Gaming":10
 };
 
-export const obtenerDescuento = (product:Product) : number =>{
+export const  obtenerDescuento = (product:Product) : number =>{
    return   descuentoPorCategoria[product.categoria] ?? descuentoDefecto;
 
 };

@@ -1403,34 +1403,16 @@
   ],
   "carrito": [
     {
-      "productoId": "24",
-      "cantidad": 1,
-      "seleccionado": true,
-      "id": "6hzjelIaXpQ"
-    },
-    {
       "productoId": "7",
       "cantidad": 1,
       "seleccionado": true,
-      "id": "p4wBUIaMp-8"
+      "id": "tqPED2yQSqo"
     },
     {
-      "productoId": "4",
+      "productoId": "1",
       "cantidad": 1,
       "seleccionado": true,
-      "id": "nPeS5ATymlg"
-    },
-    {
-      "productoId": "8",
-      "cantidad": 1,
-      "seleccionado": true,
-      "id": "CaogHXJyq0o"
-    },
-    {
-      "productoId": "4",
-      "cantidad": 1,
-      "seleccionado": true,
-      "id": "o06pz10m08Y"
+      "id": "3ub-2pcyJ8w"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

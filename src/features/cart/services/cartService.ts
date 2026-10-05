@@ -61,4 +61,3 @@ export const eliminarItem = async (id: string): Promise<void> => {
   }
 };
 
-
