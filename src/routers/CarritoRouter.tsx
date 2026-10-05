@@ -1,15 +1,45 @@
 import { Link } from "react-router-dom";
-import { useCart } from "../features/cart";
+import { useQuery } from "@tanstack/react-query";
+import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery"; 
 import { calcularPrecioFinal } from "../features/products/utils/pricing";
+import {useActualizarItem} from "../features/cart/hooks/useActualizarItem";
+import { useEliminarItem } from "../features/cart/hooks/useEliminarItem";
+import {type CarritoConProducto} from "../../src/types/carritoConProducto";
+import { obtenerProductos } from "../features/products/services/productService";
 
 export function CarritoRouter() {
-  const { cart, totalSeleccionado, toggleSeleccion, addItem, removeFromCart } = useCart();
+  
+    const { data: carrito =[] } = useCarritoQuery();
+    
+      const {
+        data: productos = []
+      } = useQuery({
+        queryKey: ["productos"],
+        queryFn: obtenerProductos,
+      });
 
-  // carrito vacio
-  if (cart.length === 0) {
+    const carritoConProductos = carrito.map((item)=>{
+        const producto = productos.find((p)=>p.id===item.productoId);
+        return {...item, producto};
+      })
+      .filter((item): item is CarritoConProducto=> item.producto!==undefined);
+      // Agregar  al Carrito
+
+  //Actualizar en el carrito
+  const actualizar = useActualizarItem();
+
+  // Eliminar del carrito
+  const eliminar= useEliminarItem();
+
+//Seleccionado en carrito
+    const totalSeleccionado = carritoConProductos.filter((item)=>item.seleccionado)
+            .reduce((sum,item)=>sum + calcularPrecioFinal(item.producto)*item.cantidad,0);
+ 
+    // carrito vacio
+  if (carrito.length === 0) {
     return (
       <div className="min-h-screen bg-fondo p-8 pt-24">
-        <h1 className=" text-2xl font-bold text-oscuro mb-4">Tu Carrito</h1>
+        <h1 className="text-2xl font-bold text-oscuro mb-4">Tu Carrito</h1>
         <p className="text-gray-500 mb-6">Tu carrito está vacío</p>
         <Link to="/" className="text-marca hover:underline">
           ← Volver a la tienda
@@ -19,20 +49,24 @@ export function CarritoRouter() {
   }
 
   return (
-    <div className="min-h-screen bg-fondo p-8 pt-24 max-w-3x1 mx-auto">
+    <div className="min-h-screen bg-fondo p-8 pt-24 max-w-3xl mx-auto">
       <h1 className="text-2x1 font-bold text-oscuro mb-6">Tu carrito</h1>
       <div className="flex flex-col gap-3">
-        {cart.map((item) => (
+        {carritoConProductos.map((item) => (
           <div
-            key={item.producto.id}
-            className="flex items-center gap-4 bg-white p-4 roundes-lg shadow-sm"
+            key={item.id}
+            className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm"
           >
             {/* Checkbox de selección */}
 
             <input
               type="checkbox"
               checked={item.seleccionado}
-              onChange={() => toggleSeleccion(item.producto.id)}
+              onChange={()=>
+                  actualizar.mutate({
+                    id: item.id,
+                    cambios:{seleccionado:!item.seleccionado},
+                  })}
               className="w-5 h-5 cursor-pointer shrink-0"
             />
             {/* Info del producto */}
@@ -52,14 +86,25 @@ export function CarritoRouter() {
             {/* Controles de cantidad */}
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={() => removeFromCart(item.producto.id)}
+                onClick={()=>{
+                  if (item.cantidad===1){
+                    eliminar.mutate(item.id)
+                  }else{
+                    actualizar.mutate({
+                      id:item.id,
+                      cambios:{cantidad:item.cantidad-1},
+                    })
+                  }}}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white hover:bg-marca-claro cursor-pointer transition-colors"
               >
                 {item.cantidad === 1 ? "🗑️" : "−"}
               </button>
               <span className="w-6 text-center">{item.cantidad}</span>
               <button
-                onClick={() => addItem(item.producto.id)}
+                onClick={()=>
+                  actualizar.mutate({
+                  id:item.id,
+                  cambios :{cantidad: item.cantidad+1}})}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white hover:bg-marca-claro cursor-pointer transition-colors"
               >
                 +

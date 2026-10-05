@@ -1403,16 +1403,40 @@
   ],
   "carrito": [
     {
-      "productoId": "7",
-      "cantidad": 1,
+      "productoId": "4",
+      "cantidad": 2,
       "seleccionado": true,
-      "id": "tqPED2yQSqo"
+      "id": "zL_E-sf62KA"
+    },
+    {
+      "productoId": "7",
+      "cantidad": 3,
+      "seleccionado": true,
+      "id": "vWXVEmvz4lA"
+    },
+    {
+      "productoId": "8",
+      "cantidad": 2,
+      "seleccionado": false,
+      "id": "GMz6SI_SLzs"
+    },
+    {
+      "productoId": "5",
+      "cantidad": 2,
+      "seleccionado": false,
+      "id": "1GiyBnpiHCY"
     },
     {
       "productoId": "1",
-      "cantidad": 1,
-      "seleccionado": true,
-      "id": "3ub-2pcyJ8w"
+      "cantidad": 3,
+      "seleccionado": false,
+      "id": "0L9uxLKnqbU"
+    },
+    {
+      "productoId": "2",
+      "cantidad": 4,
+      "seleccionado": false,
+      "id": "wPDHLcCqxls"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { MiniCarrito } from "../features/cart";
 import { ProductCard } from "../features/products";
-import { useCart } from "../features/cart";
 import { useQuery } from "@tanstack/react-query";
 import { obtenerProductos } from "../features/products/services/productService";
 import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery";
@@ -24,9 +23,6 @@ export function ProductosRouter() {
   });
 
   //carrito
-  const {
-    addToCart
-  } = useCart();
   const { data: carrito =[] } = useCarritoQuery();
   //console.log("Carrito del servidor:", carrito);
 
@@ -202,7 +198,6 @@ export function ProductosRouter() {
                   id:item.id,
                   cambios :{cantidad: item.cantidad+1} 
                 })}
-                addToCart={addToCart}
                 toggleSeleccion={(item)=>
                   actualizar.mutate({
                     id: item.id,
