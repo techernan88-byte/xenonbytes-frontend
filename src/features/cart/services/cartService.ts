@@ -1,7 +1,7 @@
 import { type CarritoServerItem } from "../../../types/carritoServerItem";
 
-const API_URL ="http://localhost:3000";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 // LEER — trae todos los items del carrito
 
 export const obtenerCarrito = async (): Promise<CarritoServerItem[]>=>{
