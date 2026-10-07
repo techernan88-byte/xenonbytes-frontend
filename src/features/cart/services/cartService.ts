@@ -30,8 +30,6 @@ export const agregarItem = async (item: Omit<CarritoServerItem,"id">): Promise<C
 
 };
 
-
-
 // ACTUALIZAR — modifica cantidad o seleccionado de una fila existente
 export const actualizarItem = async (
   id: string,

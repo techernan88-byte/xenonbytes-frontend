@@ -1429,7 +1429,7 @@
     {
       "productoId": "1",
       "cantidad": 3,
-      "seleccionado": false,
+      "seleccionado": true,
       "id": "0L9uxLKnqbU"
     },
     {

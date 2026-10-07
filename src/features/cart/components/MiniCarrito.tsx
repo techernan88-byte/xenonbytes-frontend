@@ -14,7 +14,7 @@ export const MiniCarrito = ({
       <p className="text-sm text-gray-500 mb-4">Productos: {carrito.length}</p>
       <div className="flex flex-col gap-3">
         {carrito.map((item) => (
-          <div key={item.producto.id}
+          <div key={item.id}
            className="flex items-center justify-between gap-2 pb-3 border-b border-gray-100 last:border-0">
 
             <input

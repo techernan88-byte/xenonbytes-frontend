@@ -164,12 +164,26 @@ export function ProductosRouter() {
                       key={product.id}
                       product={product}
                       inStock={product.stock > 0}
-                      onAddCart={(product) =>
-                        agregar.mutate({
-                          productoId: product.id,
-                          cantidad: 1,
-                          seleccionado: true,
-                        })
+                      onAddCart={(product) =>{
+                        const itemExistente = carrito.find((item)=>item.productoId===product.id);
+
+  
+                        if (itemExistente){
+                          actualizar.mutate({
+                            id:itemExistente.id,
+                            cambios:{cantidad:itemExistente.cantidad+1}
+                          });
+                        }
+                        else{
+                          agregar.mutate({
+                            productoId:product.id,
+                            cantidad:1,
+                            seleccionado:true
+
+                          })
+                        }
+                      }
+                     
                       }
                     />
                   ))}

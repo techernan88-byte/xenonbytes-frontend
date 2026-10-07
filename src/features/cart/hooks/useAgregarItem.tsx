@@ -7,7 +7,7 @@ export function useAgregarItem(){
     return useMutation({
         mutationFn: agregarItem,
         onSuccess: ()=>{
-            queryClient.invalidateQueries({queryKey:["Carrito"]});
+            queryClient.invalidateQueries({queryKey:["carrito"]});
         },
     });
 }
