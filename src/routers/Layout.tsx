@@ -1,6 +1,10 @@
 import {Outlet,Link} from "react-router-dom";
+import { useAuth } from "../features/auth/context/authcontext";
+
 
 export function Layout(){
+    const {usuario,logout} = useAuth();
+
     return (
         <div className="min-h-screen flex flex-col bg-fondo">
         <header className="fixed top-0 left-0 right-0 bg-oscuro text-white px-6 py-4 flex items-center gap-6 shadow-md z-50">
@@ -9,10 +13,17 @@ export function Layout(){
           <Link to="/" className="hover:text-marca-claro transition-colors">Inicio</Link>
           <Link to="/" className="hover:text-marca-claro transition-colors">Productos</Link>
           <Link to="/carrito" className="hover:text-marca-claro transition-colors">Carrito</Link>
+          {usuario && (<Link to="/perfil" className="hover:text-marca-claro transition-colors">Cuenta</Link>)}
         </nav>
-        <a href="#" className="ml-auto hover:text-marca-claro transition-colors">
-          Iniciar Sesión
-        </a>
+        {usuario ?(
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm">Cuenta: {usuario.nombre ||usuario.email}</span>
+            <button onClick={logout} className="bg-marca text-white px-3 py-1 rounded hover:bg-marca-claro transition-colors cursor-pointer">
+            Cerrar Sesión</button>
+          </div>
+        ) : (
+          <Link to="/login" className="ml-auto hover:text-marca-claro transition-colors">Iniciar Sesión</Link>
+        )}
       </header>
       <Outlet/>
 
