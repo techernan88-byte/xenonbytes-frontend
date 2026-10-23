@@ -1,41 +1,32 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery"; 
+import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery";
 import { calcularPrecioFinal } from "../features/products/utils/pricing";
-import {useActualizarItem} from "../features/cart/hooks/useActualizarItem";
+import { useActualizarItem } from "../features/cart/hooks/useActualizarItem";
 import { useEliminarItem } from "../features/cart/hooks/useEliminarItem";
-import {type CarritoConProducto} from "../../src/types/carritoConProducto";
-import { obtenerProductos } from "../features/products/services/productService";
+import { type CarritoConProducto } from "../../src/types/carritoConProducto";
 
 export function CarritoRouter() {
-  
-    const { data: carrito =[] } = useCarritoQuery();
-    
-      const {
-        data: productos = []
-      } = useQuery({
-        queryKey: ["productos"],
-        queryFn: obtenerProductos,
-      });
+  const { data: carrito = [] } = useCarritoQuery();
 
-    const carritoConProductos = carrito.map((item)=>{
-        const producto = productos.find((p)=>p.id===item.productoId);
-        return {...item, producto};
-      })
-      .filter((item): item is CarritoConProducto=> item.producto!==undefined);
-      // Agregar  al Carrito
+  // Se filtra  por si algún item viniera sin producto.
+  const carritoConProductos = carrito.filter(
+    (item):item is CarritoConProducto =>item.producto !==undefined,
+  );
+
 
   //Actualizar en el carrito
   const actualizar = useActualizarItem();
-
   // Eliminar del carrito
-  const eliminar= useEliminarItem();
+  const eliminar = useEliminarItem();
 
-//Seleccionado en carrito
-    const totalSeleccionado = carritoConProductos.filter((item)=>item.seleccionado)
-            .reduce((sum,item)=>sum + calcularPrecioFinal(item.producto)*item.cantidad,0);
+
+  const totalSeleccionado = carritoConProductos.
+  filter(item=> item.seleccionado).
+  reduce((sum, item)=> sum+calcularPrecioFinal(item.producto) ,0);
+
  
-    // carrito vacio
+
+  // carrito vacio
   if (carrito.length === 0) {
     return (
       <div className="min-h-screen bg-fondo p-8 pt-24">
@@ -62,11 +53,12 @@ export function CarritoRouter() {
             <input
               type="checkbox"
               checked={item.seleccionado}
-              onChange={()=>
-                  actualizar.mutate({
-                    id: item.id,
-                    cambios:{seleccionado:!item.seleccionado},
-                  })}
+              onChange={() =>
+                actualizar.mutate({
+                  id: item.id,
+                  cambios: { seleccionado: !item.seleccionado },
+                })
+              }
               className="w-5 h-5 cursor-pointer shrink-0"
             />
             {/* Info del producto */}
@@ -86,25 +78,28 @@ export function CarritoRouter() {
             {/* Controles de cantidad */}
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={()=>{
-                  if (item.cantidad===1){
-                    eliminar.mutate(item.id)
-                  }else{
+                onClick={() => {
+                  if (item.cantidad === 1) {
+                    eliminar.mutate(item.id);
+                  } else {
                     actualizar.mutate({
-                      id:item.id,
-                      cambios:{cantidad:item.cantidad-1},
-                    })
-                  }}}
+                      id: item.id,
+                      cambios: { cantidad: item.cantidad - 1 },
+                    });
+                  }
+                }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white hover:bg-marca-claro cursor-pointer transition-colors"
               >
                 {item.cantidad === 1 ? "🗑️" : "−"}
               </button>
               <span className="w-6 text-center">{item.cantidad}</span>
               <button
-                onClick={()=>
+                onClick={() =>
                   actualizar.mutate({
-                  id:item.id,
-                  cambios :{cantidad: item.cantidad+1}})}
+                    id: item.id,
+                    cambios: { cantidad: item.cantidad + 1 },
+                  })
+                }
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-marca text-white hover:bg-marca-claro cursor-pointer transition-colors"
               >
                 +

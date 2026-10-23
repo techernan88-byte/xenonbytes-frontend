@@ -5,7 +5,7 @@ import {useAuth} from "../context/authcontext";
 export function RutaProtegida ({children}:{children:ReactNode}){
     const {usuario}= useAuth();
     if(!usuario){
-        return <Navigate to="/login" replace />
+        return <Navigate to="/" replace />
     }
     return <>{children}</>
 };

@@ -1,29 +1,62 @@
 import { useState } from "react";
 import { MiniCarrito } from "../features/cart";
 import { ProductCard } from "../features/products";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { obtenerProductos } from "../features/products/services/productService";
 import { useCarritoQuery } from "../features/cart/hooks/useCarritoQuery";
-import {useAgregarItem } from "../features/cart/hooks/useAgregarItem";
-import {useActualizarItem} from "../features/cart/hooks/useActualizarItem";
+import { useAgregarItem } from "../features/cart/hooks/useAgregarItem";
+import { useActualizarItem } from "../features/cart/hooks/useActualizarItem";
 import { useEliminarItem } from "../features/cart/hooks/useEliminarItem";
-import {type CarritoConProducto} from "../types/carritoConProducto";
+import { type CarritoConProducto } from "../types/carritoConProducto";
 import { calcularPrecioFinal } from "../features/products/utils/pricing";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/context/authcontext";
+import { Paginacion } from "../features/products/components/Paginacion";
+import { useCategorias } from "../features/categoria/hooks/useCategorias";
+import { useDebounce } from "../hooks/useDebounce";
 
 export function ProductosRouter() {
-  //obtener datos de servicio
+  
+  const [pagina, setPagina] =useState(1);
+  
+  
+
+    //categorias  
+  const {data:categoriaData=[]} = useCategorias();
+  const categorias =["Todo",...categoriaData.map((c)=>c.nombre)];
+  const [estadoCategoria, setCategoria] = useState("Todo");
+
+  //Filtro
+  const [busqueda, setBusqueda] = useState("");
+  const busquedaDebounced= useDebounce(busqueda,300);
+  const [soloDisponibles, setSoloDisponibles] = useState(false);
+
+  //obtener datos de PRODUCTOS
   const {
-    data: productos = [],
+    data: data,
     isPending: cargando,
     isError,
     error,
   } = useQuery({
-    queryKey: ["productos"],
-    queryFn: obtenerProductos,
+    queryKey: ["productos", pagina, estadoCategoria, busquedaDebounced, soloDisponibles],
+    queryFn: ()=>obtenerProductos(
+      pagina, 
+      estadoCategoria==="Todo"?undefined:estadoCategoria,
+      busquedaDebounced|| undefined,
+      soloDisponibles,
+    ),
+    placeholderData: keepPreviousData,
   });
 
+  // El backend devuelve { Productos, total, page, totalPaginas }
+  // si el dato existe trae el dato si no dejalo en []
+  const productos = data?.productos ?? [];
+  const totalPaginas = data?.totalPaginas?? 1;
+  console.log(productos);
+  // console.log(data?.page);
+   console.log(data?.totalPaginas);
   //carrito
-  const { data: carrito =[] } = useCarritoQuery();
+  const { data: carrito = [] } = useCarritoQuery();
   //console.log("Carrito del servidor:", carrito);
 
   // Agregar  al Carrito
@@ -33,46 +66,43 @@ export function ProductosRouter() {
   const actualizar = useActualizarItem();
 
   // Eliminar del carrito
-  const eliminar= useEliminarItem();
+  const eliminar = useEliminarItem();
+
+  const navigate = useNavigate();
+  const { token } = useAuth();
 
   //Encontrar datos productos en carrito
-  const carritoConProductos = carrito.map((item)=>{
-    const producto = productos.find((p)=>p.id===item.productoId);
-    return {...item, producto};
-  })
-  .filter((item): item is CarritoConProducto=> item.producto!==undefined);
-  
-  const totalSeleccionado = carritoConProductos.filter((item)=>item.seleccionado)
-            .reduce((sum,item)=>sum + calcularPrecioFinal(item.producto)*item.cantidad,0);
+  const carritoConProductos = carrito
+    .map((item) => {
+      const producto = productos.find((p) => p.id === item.productoId);
+      return { ...item, producto };
+    })
+    .filter((item): item is CarritoConProducto => item.producto !== undefined);
+
+  const totalSeleccionado = carritoConProductos
+    .filter((item) => item.seleccionado)
+    .reduce(
+      (sum, item) => sum + calcularPrecioFinal(item.producto) * item.cantidad,
+      0,
+    );
 
   //sidebar
   const [sideBarAbierto, setSidebarAbierto] = useState(false);
   const cambioSidebar = () => setSidebarAbierto((prev) => !prev);
 
-  //categorias
-  const categorias = ["Todo", ...new Set(productos.map((p) => p.categoria))];
-  const [estadoCategoria, setCategoria] = useState("Todo");
-  const productosFiltrados =
-    estadoCategoria === "Todo"
-      ? productos
-      : productos.filter((p) => p.categoria === estadoCategoria);
 
-  // filtros
-  const [soloDisponibles, setSoloDisponibles] = useState(false);
-  const productosVisibles = soloDisponibles
-    ? productosFiltrados.filter((p) => p.stock > 0)
-    : productosFiltrados;
+
+  const elegirCategoria = (nombre:string)=>{
+    setCategoria(nombre);
+    setPagina(1);
+  };
+
 
   // busqueda
-  const [busqueda, setBusqueda] = useState("");
-  const productosBuscados =
-    busqueda === ""
-      ? productosVisibles
-      : productosVisibles.filter((p) =>
-          p.titulo.toLowerCase().includes(busqueda.toLowerCase()),
-        );
+  
 
-     //   console.log(productosBuscados);
+
+  //   console.log(productosBuscados);
 
   return (
     <>
@@ -89,7 +119,7 @@ export function ProductosRouter() {
             {categorias.map((categoria) => (
               <li
                 key={categoria}
-                onClick={() => setCategoria(categoria)}
+                onClick={() => elegirCategoria(categoria)}
                 className={`px-3 py-2 rounded-lg cursor-pointer transition-colors 
                   ${
                     estadoCategoria === categoria
@@ -121,14 +151,17 @@ export function ProductosRouter() {
               type="text"
               placeholder="Buscar producto..."
               value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
+              onChange={(e) => {setBusqueda(e.target.value);
+                                setPagina(1);
+              }}
               className="border border-gray-300 rounded px-3 py-2 w-full max-w-xs"
             />
             <input
               type="checkbox"
               id="disponibles"
               checked={soloDisponibles}
-              onChange={(e) => setSoloDisponibles(e.target.checked)}
+              onChange={(e) => {setSoloDisponibles(e.target.checked);
+                                setPagina(1);}}
               className="w-4 h-4 cursor-pointer"
             />
             <label
@@ -146,11 +179,11 @@ export function ProductosRouter() {
                 <p className="p-8">Cargando productos...</p>
               ) : isError ? (
                 <p className="p-8 text-red-500">Error: {error.message}</p>
-              ) : productosBuscados.length === 0 ? (
+              ) : productos.length === 0 ? (
                 <div className="text-center py-16 text-gray-500">
                   <p className="text-lg font-medium">
                     {" "}
-                    No se encontraron productos
+                    No se encontraron productos{" "}
                   </p>
                   <p className="text-sm">
                     {" "}
@@ -159,69 +192,79 @@ export function ProductosRouter() {
                 </div>
               ) : (
                 <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                  {productosBuscados.map((product) => (
+                  {productos.map((product) => (
                     <ProductCard
                       key={product.id}
                       product={product}
                       inStock={product.stock > 0}
-                      onAddCart={(product) =>{
-                        const itemExistente = carrito.find((item)=>item.productoId===product.id);
+                      onAddCart={(product) => {
+                        if (!token) {
+                          navigate("/");
+                          return;
+                        }
+                        const itemExistente = carrito.find(
+                          (item) => item.productoId === product.id,
+                        );
 
-  
-                        if (itemExistente){
+                        if (itemExistente) {
                           actualizar.mutate({
-                            id:itemExistente.id,
-                            cambios:{cantidad:itemExistente.cantidad+1}
+                            id: itemExistente.id,
+                            cambios: { cantidad: itemExistente.cantidad + 1 },
+                          });
+                        } else {
+                          agregar.mutate({
+                            productoId: product.id,
+                            cantidad: 1,
+                            seleccionado: true,
                           });
                         }
-                        else{
-                          agregar.mutate({
-                            productoId:product.id,
-                            cantidad:1,
-                            seleccionado:true
-
-                          })
-                        }
-                      }
-                     
-                      }
+                      }}
                     />
                   ))}
                 </div>
               )}
             </div>
 
+    
+
+
             <div className="w-full lg:w-1/4 lg:sticky lg:top-4">
               <MiniCarrito
                 carrito={carritoConProductos}
-                quitItem={(item)=>{
-                  if (item.cantidad===1){
-                    eliminar.mutate(item.id)
-                  }else{
+                quitItem={(item) => {
+                  if (item.cantidad === 1) {
+                    eliminar.mutate(item.id);
+                  } else {
                     actualizar.mutate({
-                      id:item.id,
-                      cambios:{cantidad:item.cantidad-1},
-                    })
-                  }}
-                }
-                clearCart={()=>{
-                  carrito.forEach((item)=>eliminar.mutate(item.id))
+                      id: item.id,
+                      cambios: { cantidad: item.cantidad - 1 },
+                    });
+                  }
                 }}
-                addItem={(item)=>
-                  actualizar.mutate({
-                  id:item.id,
-                  cambios :{cantidad: item.cantidad+1} 
-                })}
-                toggleSeleccion={(item)=>
+                clearCart={() => {
+                  carrito.forEach((item) => eliminar.mutate(item.id));
+                }}
+                addItem={(item) =>
                   actualizar.mutate({
                     id: item.id,
-                    cambios:{seleccionado:!item.seleccionado},
+                    cambios: { cantidad: item.cantidad + 1 },
+                  })
+                }
+                toggleSeleccion={(item) =>
+                  actualizar.mutate({
+                    id: item.id,
+                    cambios: { seleccionado: !item.seleccionado },
                   })
                 }
                 totalSeleccionado={totalSeleccionado}
               />
             </div>
           </div>
+            <Paginacion
+            pagina={pagina}
+            totalPaginas={totalPaginas}
+            onCambiar={setPagina}
+          />
         </main>
       </div>
     </>

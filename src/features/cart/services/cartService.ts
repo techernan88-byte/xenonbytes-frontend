@@ -4,8 +4,10 @@ import { type CarritoServerItem } from "../../../types/carritoServerItem";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 // LEER — trae todos los items del carrito
 
-export const obtenerCarrito = async (): Promise<CarritoServerItem[]>=>{
-    const respuesta = await fetch(`${API_URL}/carrito`);
+export const obtenerCarrito = async (token:string): Promise<CarritoServerItem[]>=>{
+    const respuesta = await fetch(`${API_URL}/carrito`,{
+      headers:{Authorization: `Bearer ${token}`}
+    });
     if(!respuesta.ok){
         throw new Error("NO se pudo obtener los datos") 
     }
@@ -14,11 +16,16 @@ export const obtenerCarrito = async (): Promise<CarritoServerItem[]>=>{
 };
 
 // AGREGAR — crea una fila nueva. Recibe el item SIN id (json-server asigna el id)
-export const agregarItem = async (item: Omit<CarritoServerItem,"id">): Promise<CarritoServerItem>=>{
+export const agregarItem = async (
+  token:string,
+  item: Omit<CarritoServerItem,"id">): Promise<CarritoServerItem>=>{
 
   const respuesta = await fetch(`${API_URL}/carrito`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
     body: JSON.stringify(item),
   });
 
@@ -32,12 +39,15 @@ export const agregarItem = async (item: Omit<CarritoServerItem,"id">): Promise<C
 
 // ACTUALIZAR — modifica cantidad o seleccionado de una fila existente
 export const actualizarItem = async (
+  token:string,
   id: string,
   cambios: Partial<Pick<CarritoServerItem, "cantidad" | "seleccionado">>
 ): Promise<CarritoServerItem> => {
   const respuesta = await fetch(`${API_URL}/carrito/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+       Authorization: `Bearer ${token}` },
     body: JSON.stringify(cambios),
   });
 
@@ -49,9 +59,10 @@ export const actualizarItem = async (
 };
 
 // ELIMINAR — borra una fila
-export const eliminarItem = async (id: string): Promise<void> => {
+export const eliminarItem = async (token: string, id: string): Promise<void> => {
   const respuesta = await fetch(`${API_URL}/carrito/${id}`, {
     method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!respuesta.ok) {
