@@ -1,6 +1,7 @@
 import {useState} from "react";
 import { useExtraerProducto } from "../hooks/useExtraerProducto";
 import { useRegistrarProducto } from "../hooks/useRegistrarProducto";
+import { useCategorias } from "../../categoria/hooks/useCategorias"; 
 
 export const CatalogadorForm = ()=>{
 
@@ -10,12 +11,16 @@ export const CatalogadorForm = ()=>{
     const [precioMercado, setPrecioMercado] = useState<number|null>(null); 
     const [precioVenta, setPrecioVenta]=useState("");
     const [categoria,setCategoria]= useState ("");
+    const [modoNueva, setModoNueva] = useState(false); // if true = usuario escribe categoría nueva
+    const [esNueva, setEsNueva] = useState(false);
     const [descripcion, setDescripcion]= useState ("");
     const [errorDatos, setErrorDatos]= useState<string|null>(null);
 
     const [hayBorrador, setHayBorrador]=useState(false);
     const extraer= useExtraerProducto();
     const registrarProducto=useRegistrarProducto();
+
+    const { data: categoriaData=[]} =useCategorias();
 
     const onExtraer = ()=>{
 
@@ -28,6 +33,7 @@ export const CatalogadorForm = ()=>{
                 setTitulo(data.titulo);
                 setPrecioMercado(data.precio_mercado);
                 setCategoria(data.categoria);
+                setEsNueva(data.esNueva);
                 setDescripcion(data.descripcion);
                 setPrecioVenta("");
                 setHayBorrador(true);
@@ -35,6 +41,22 @@ export const CatalogadorForm = ()=>{
         });
 
     };
+
+
+     //Decisión ´para  Crear nueva categoria
+    const onCambiarCategoria = (valor:string)=>{
+      if (valor==="__nueva__"){
+        //mantiene la cateogia sugerida por APICLAUDE
+        setEsNueva(true);
+      }
+      else{
+        setCategoria(valor);
+        setEsNueva(false);
+      }
+    };
+
+
+
    /// PENDIENTE PARA BASE DE DATOS
     const onRegistrar = ()=>{
      
@@ -50,6 +72,7 @@ export const CatalogadorForm = ()=>{
         titulo:titulo, 
         precio: precioNum, 
         categoria:categoria, 
+        esNueva:esNueva,
         descripcion:descripcion},{
         onSuccess:()=>{
           //limpiar campos
@@ -58,6 +81,7 @@ export const CatalogadorForm = ()=>{
           setPrecioMercado(null);
           setPrecioVenta("");
           setCategoria("");
+          setEsNueva(false);
           setDescripcion("");
           setHayBorrador(false);
         },
@@ -131,13 +155,25 @@ export const CatalogadorForm = ()=>{
             <label className="text-sm font-medium text-oscuro">
                 Categoría
             </label>
-            <input
-              type="text"
-              value={categoria}
-              onChange={(e)=> setCategoria(e.target.value)}
-              placeholder="Escribe el precio"
+            <select
+             
+              value={esNueva?"__nueva__" :categoria  }
+              onChange={(e)=> onCambiarCategoria(e.target.value)}   
               className="border border-gray-300 rounded px-3 py-2 w-full"
-            />
+            >
+            {esNueva&& (
+              <option value="__nueva__">➕ Crear nueva:{categoria}</option>
+            )}
+            {categoriaData.map((c)=>(
+              <option key={c.id} value={c.nombre}>{c.nombre}</option>
+            ))}
+            </select>
+            {esNueva && (
+              <p className="text-sm text-orange-800 font-medium">
+                ⚠️ "{categoria}" Es una nueva. Se creara al registrar
+              </p>
+            )}
+
              <label className="text-sm font-medium text-oscuro">Descripción</label>
           <textarea
             value={descripcion}
