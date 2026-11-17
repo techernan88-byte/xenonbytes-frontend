@@ -7,6 +7,8 @@ import { RutaProtegida } from "./features/auth/components/RutaProtegida";
 import { Perfil } from "./features/auth/components/Perfil";
 import { RegisterForm } from "./features/auth/components/RegisterForm";
 import { CatalogadorForm } from "./features/catalogador/components/CatalogadorForm";
+import { ChatPage } from "./features/chat";  // ← NUEVO
+
 function App() {
   return (
     <Routes>
@@ -38,9 +40,8 @@ function App() {
         ></Route>
         <Route path="/registro" element={<RegisterForm />}></Route>
         <Route path="/catalogador" element={<CatalogadorForm />}></Route>
+        <Route path="/asistente" element={<ChatPage />}></Route>  {/* ← NUEVO: público */}
       </Route>
-
-      
     </Routes>
   );
 }

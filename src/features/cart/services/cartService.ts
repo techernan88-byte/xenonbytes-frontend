@@ -1,5 +1,5 @@
-import { type CarritoServerItem } from "../../../types/carritoServerItem";
 
+import { type CarritoServerItem, type NuevoItemCarrito } from "../../../types/carritoServerItem";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 // LEER — trae todos los items del carrito
@@ -18,7 +18,7 @@ export const obtenerCarrito = async (token:string): Promise<CarritoServerItem[]>
 // AGREGAR — crea una fila nueva. Recibe el item SIN id (json-server asigna el id)
 export const agregarItem = async (
   token:string,
-  item: Omit<CarritoServerItem,"id">): Promise<CarritoServerItem>=>{
+  item: NuevoItemCarrito): Promise<CarritoServerItem>=>{
 
   const respuesta = await fetch(`${API_URL}/carrito`, {
     method: "POST",
