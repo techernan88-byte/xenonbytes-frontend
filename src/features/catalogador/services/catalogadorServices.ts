@@ -8,7 +8,7 @@ export const extraerProducto = async (text:string): Promise<ProductoExtraido>=>{
     const respuesta = await fetch(`${API_URL}/catalogador/extraer`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({texto:text})
+        body: JSON.stringify({texto:text}),
     });
 
     if(!respuesta.ok){
