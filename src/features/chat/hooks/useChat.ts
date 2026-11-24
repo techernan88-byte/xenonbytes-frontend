@@ -53,7 +53,7 @@ export function useChat() {
         // 3. Agregar la respuesta del assistant al UI
         const mensajeAssistant: MensajeUI = {
           id: crypto.randomUUID(),
-          rol: "assitant",
+          rol: "assistant",
           texto: respuesta.respuesta,
           timestamp: Date.now(),
         };

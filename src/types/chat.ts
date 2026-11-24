@@ -9,13 +9,13 @@ export interface ChatRequest {
 /// lo que se recibe del back
 export interface ChatResponse{
     conversacionId: number,
-    mensaje:string,
+    respuesta:string,
 };
 
 // lo que renderiza el front en la pantalla
 export interface MensajeUI{
     id:string,
-    rol: "user"| "assitant";
+    rol: "user"| "assistant";
     texto:string;
     timestamp:number,
 };
